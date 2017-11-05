@@ -1,0 +1,2 @@
+# STASHPAY-Token
+STASHPAY ERC20 Token Contract
