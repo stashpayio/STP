@@ -1,8 +1,8 @@
-pragma solidity ^0.4.16;
+pragma solidity ^0.4.18;
 
 /// Implements ERC20 Token standard: https://github.com/ethereum/EIPs/issues/20
 /// AUDITED: N
-contract ERC20Token {
+interface ERC20Token {
 
     event Transfer(address indexed _from, address indexed _to, uint _value);
     event Approval(address indexed _owner, address indexed _spender, uint _value);
@@ -12,6 +12,40 @@ contract ERC20Token {
     function approve(address _spender, uint _value) public returns (bool);
     function balanceOf(address _owner) public constant returns (uint);
     function allowance(address _owner, address _spender) public constant returns (uint);    
+}
+
+/**
+ * @title SafeMath
+ * @dev Math operations with safety checks that throw on error
+ */
+library SafeMath {
+
+  function mul(uint256 a, uint256 b) internal pure returns (uint256) {
+    if (a == 0) {
+      return 0;
+    }
+    uint256 c = a * b;
+    assert(c / a == b);
+    return c;
+  }
+
+  function div(uint256 a, uint256 b) internal pure returns (uint256) {
+    // assert(b > 0); // Solidity automatically throws when dividing by 0
+    uint256 c = a / b;
+    // assert(a == b * c + a % b); // There is no case in which this doesn't hold
+    return c;
+  }
+
+  function sub(uint256 a, uint256 b) internal pure returns (uint256) {
+    assert(b <= a);
+    return a - b;
+  }
+
+  function add(uint256 a, uint256 b) internal pure returns (uint256) {
+    uint256 c = a + b;
+    assert(c >= a);
+    return c;
+  }
 }
 
 /// @title Abstract token contract - Functions to be implemented by token contracts
@@ -65,9 +99,9 @@ contract Lockable is Ownable {
     mapping (address => bool) public frozenAccount;    
     
     /// Audited: N
-    event LockProposed(address target, uint releaseTime);
-    event LockApproved(address target, uint releaseTime);
-    event LockRejected(address target, uint releaseTime);
+    event LockProposed(address indexed target, uint releaseTime);
+    event LockApproved(address indexed target, uint releaseTime);
+    event LockRejected(address indexed target, uint releaseTime);
 
     /// Audited: N  
     modifier onlyUnlocked(address _target) {
@@ -165,37 +199,18 @@ contract Token is ERC20Token, Lockable {
      *  Storage
      */
     mapping (address => uint) balances;
-    mapping (address => mapping (address => uint)) allowances;    
+    mapping (address => mapping (address => uint)) allowances; 
+    mapping (address => string) extra;
     uint    public totalSupply;
     uint    public timeTransferbleUntil = 1538262000;                        // Transferable until 29/09/2018 23:00 pm UTC
-
-    event Burn(address indexed from, uint256 value);
+    bool    public stopped = false;
+ 
+    event Burn(address indexed from, uint256 value, string data);
+    event LogStop();
 
     modifier transferable() {
-        assert(now < timeTransferbleUntil);
+        assert(!stopped);
         _;
-    }
-
-    function extendTransferableInMinutes(uint timeInMinutes)
-        public
-        onlyOwner
-    {
-        timeTransferbleUntil += timeInMinutes * 1 minutes;
-    }
-
-    function extendTransferableInDays(uint timeInDays)
-        public
-        onlyOwner
-    {
-        timeTransferbleUntil += timeInDays * 1 days;
-    }
-
-     function extendTransferable(uint _timeTransferbleUntil)
-        public
-        onlyOwner
-    {
-        assert(_timeTransferbleUntil > timeTransferbleUntil);
-        timeTransferbleUntil = _timeTransferbleUntil;
     }
 
     /*
@@ -209,19 +224,16 @@ contract Token is ERC20Token, Lockable {
     function transfer(address _to, uint _value)
         public
         onlyUnlocked(msg.sender)
-        onlyUnfrozen(msg.sender)                                        // Owners funds provably frozen
+        onlyUnfrozen(msg.sender)                                           // Owners funds provably frozen
         transferable()
         returns (bool)        
     {                         
-        assert(_to != 0x0);                                             // Prevent transfer to 0x0 address. Use burn() instead
-        assert(balances[msg.sender] >= _value);                         // Check if the sender has enough
-        assert(balances[_to] + _value >= balances[_to]);                // Check for overflows
-        assert(!isFrozen(_to));                                         // Do not allow transfers to frozen accounts
-        uint previousBalances = balances[msg.sender] + balances[_to];   // Save this for an assertion in the future
-        balances[msg.sender] -= _value;                                 // Subtract from the sender
-        balances[_to] += _value;                                        // Add the same to the recipient
-        Transfer(msg.sender, _to, _value);                              // Notify anyone listening that this transfer took place
-        assert(balances[msg.sender] + balances[_to] == previousBalances);
+        assert(_to != 0x0);                                                // Prevent transfer to 0x0 address. Use burn() instead
+        assert(balances[msg.sender] >= _value);                            // Check if the sender has enough
+        assert(!isFrozen(_to));                                            // Do not allow transfers to frozen accounts
+        balances[msg.sender] = SafeMath.sub(balances[msg.sender], _value); // Subtract from the sender
+        balances[_to] = SafeMath.add(balances[_to], _value);               // Add the same to the recipient
+        Transfer(msg.sender, _to, _value);                                 // Notify anyone listening that this transfer took place
         return true;       
     }
 
@@ -240,15 +252,12 @@ contract Token is ERC20Token, Lockable {
     {        
         assert(_to != 0x0);                                             // Prevent transfer to 0x0 address. Use burn() instead
         assert(balances[_from] >= _value);                              // Check if the sender has enough
-        assert(balances[_to] + _value >= balances[_to]);                // Check for overflows
         assert(_value <= allowances[_from][msg.sender]);                // Check allowance
         assert(!isFrozen(_to));                                         // Do not allow transfers to frozen accounts
-        uint previousBalances = balances[_from] + balances[_to];        // Save this for an assertion in the future
-        balances[_from] -= _value;                                      // Subtract from the sender
-        balances[_to] += _value;                                        // Add the same to the recipient
-        allowances[_from][msg.sender] -= _value;
+        balances[_from] = SafeMath.sub(balances[_from], _value);        // Subtract from the sender
+        balances[_to] = SafeMath.add(balances[_to], _value);            // Add the same to the recipient
+        allowances[_from][msg.sender] = SafeMath.sub(allowances[_from][msg.sender], _value); 
         Transfer(_from, _to, _value);
-        assert(balances[_from] + balances[_to] == previousBalances);
         return true;
     }
 
@@ -294,18 +303,28 @@ contract Token is ERC20Token, Lockable {
     // @title Destroy tokens
     // @dev remove `_value` tokens from the system irreversibly     
     // @param _value the amount of tokens to burn   
-    function burn(uint256 _value) 
+    function burn(uint256 _value, string _data) 
         public 
         returns (bool success) 
     {
-        assert(balances[msg.sender] > 0);                               // Amount must be greater than zero
-        assert(balances[msg.sender] >= _value);                         // Check if the sender has enough
-        uint previousTotal = totalSupply;                               // Start integrity check
-        balances[msg.sender] -= _value;                                 // Subtract from the sender
-        totalSupply -= _value;                                          // Updates totalSupply
-        assert(previousTotal - _value == totalSupply);                  // End integrity check 
-        Burn(msg.sender, _value);
+        assert(_value > 0);                                                // Amount must be greater than zero
+        assert(balances[msg.sender] >= _value);                            // Check if the sender has enough
+        uint previousTotal = totalSupply;                                  // Start integrity check
+        balances[msg.sender] = SafeMath.sub(balances[msg.sender], _value); // Subtract from the sender
+        extra[msg.sender] = _data;                                         // Additional data
+        totalSupply = SafeMath.sub(totalSupply, _value);                   // Updates totalSupply
+        assert(previousTotal - _value == totalSupply);                     // End integrity check 
+        Burn(msg.sender, _value, _data);
         return true;
+    }
+
+    // Anyone can freeze the token after transfer time has expired
+    function stop() 
+        public
+    {
+        assert(now > timeTransferbleUntil);
+        stopped = true;
+        LogStop();
     }
 }
 
@@ -369,49 +388,53 @@ contract STP is Token {
         */
         require(assignedTokens == totalSupply);                 
     }  
-
-    /// Register mainnet public key
-    /// AUDITED: N
-    function register(string publicKey)
+    
+    function registerKey(string publicKey)
     public
+    transferable
     { 
         assert(balances[msg.sender] > 0);
         assert(bytes(publicKey).length <= publicKeySize);
               
-        publicKeys[msg.sender] = publicKey;      
+        publicKeys[msg.sender] = publicKey; 
+        RegisterKey(msg.sender, publicKey);    
     }           
 
     /// @dev only if we need to make changes to the public size key
     /// bitcoin key size is 65 characters (130 Hex character), zcash z address is 95 (190 Hex characters)
-    function modifypublicKeySize(uint8 _publicKeySize)
+    function modifyPublicKeySize(uint8 _publicKeySize)
     public
     onlyOwner
     { 
         publicKeySize = _publicKeySize;
     }
 
-     function distribute(address[] addresses, uint[] tokens)
-     public
-     onlyOwner
-     {
-        assert(addresses.length > 0);
-        assert(addresses.length == tokens.length);
-        
-        uint assignedTokens = 0;
-        uint previousBalance = balances[sale];
+    function multiDistribute(uint256[] data) 
+    public
+    onlyUnfrozen(sale)
+    onlyOwner 
+    {
+     for (uint256 i = 0; i < data.length; i++) {
+       address addr = address(data[i] & (D160 - 1));
+       uint256 amount = data[i] / D160;
+       balances[sale] -= amount;                        
+       balances[addr] += amount;                                       
+       Transfer(sale, addr, amount);    
+      }
+    }
+   
+    function multiDistributeAmount(uint256 amount, address[] data) 
+    public
+    onlyUnfrozen(sale) 
+    onlyOwner 
+    {
+      for (uint256 i = 0; i < data.length; i++) {                            
+        balances[data[i]] += amount;                                       
+        Transfer(sale, data[i], amount);    
+      }
 
-        for (uint i = 0; i < addresses.length; i++) {
-            require (addresses[i] != 0);    
-            require (tokens[i] != 0);                                         
-            tokens[i] = tokens[i] * 10**uint256(decimals);                          
-            balances[addresses[i]] += tokens[i];                                       
-            Transfer(0, addresses[i], tokens[i]);                                      
-            assignedTokens += tokens[i];                                                                                
-        }
-
-        assert(balances[sale] + assignedTokens == previousBalance);
-     }
-
+        balances[sale] = SafeMath.add(balances[sale], amount * data.length);   
+    }
 
     /// @dev when token distrubution is complete freeze any remaining tokens for life of contract
     function distributionComplete()
@@ -419,5 +442,19 @@ contract STP is Token {
     onlyOwner
     {
         frozenAccount[sale] = true;
+    }
+
+    function setName(string _name)
+    public 
+    onlyOwner 
+    {
+        name = _name;
+    }
+
+    function setSymbol(string _symbol)
+    public 
+    onlyOwner 
+    {
+        symbol = _symbol;
     }
 }
