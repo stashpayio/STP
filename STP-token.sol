@@ -148,6 +148,7 @@ contract Lockable is Ownable {
         onlyOwner 
         onlyUnlocked(_target)
     {
+        lockedAccounts[_target].lockApproved = false;
         lockedAccounts[_target].releaseTime = _releaseTime;
         LockProposed(_target, lockedAccounts[_target].releaseTime);
     }
@@ -246,16 +247,16 @@ contract Token is ERC20Token, Lockable {
     function transferFrom(address _from, address _to, uint _value)
         public
         onlyUnlocked(_from)          
-        onlyUnfrozen(msg.sender)                                        // Owners can never transfer funds
+        onlyUnfrozen(msg.sender)                                          // Owners can never transfer funds
         transferable()                 
         returns (bool)
     {        
-        assert(_to != 0x0);                                             // Prevent transfer to 0x0 address. Use burn() instead
-        assert(balances[_from] >= _value);                              // Check if the sender has enough
-        assert(_value <= allowances[_from][msg.sender]);                // Check allowance
-        assert(!isFrozen(_to));                                         // Do not allow transfers to frozen accounts
-        balances[_from] = SafeMath.sub(balances[_from], _value);        // Subtract from the sender
-        balances[_to] = SafeMath.add(balances[_to], _value);            // Add the same to the recipient
+        assert(_to != 0x0);                                               // Prevent transfer to 0x0 address. Use burn() instead
+        assert(balances[_from] >= _value);                                // Check if the sender has enough
+        assert(_value <= allowances[_from][msg.sender]);                  // Check allowance
+        assert(!isFrozen(_to));                                           // Do not allow transfers to frozen accounts
+        balances[_from] = SafeMath.sub(balances[_from], _value);          // Subtract from the sender
+        balances[_to] = SafeMath.add(balances[_to], _value);              // Add the same to the recipient
         allowances[_from][msg.sender] = SafeMath.sub(allowances[_from][msg.sender], _value); 
         Transfer(_from, _to, _value);
         return true;
@@ -338,8 +339,10 @@ contract STP is Token {
     address public adviserAndBounty;
     uint    public dateCreated = now;
     mapping (address => string) public publicKeys;
+    uint256 constant D160 = 0x0010000000000000000000000000000000000000000;
 
     event RegisterKey(address indexed _from, string _publicKey);
+    event ModifyPublicKeySize(uint8 _size);
 
     function STP(
         address _sale,
@@ -433,7 +436,7 @@ contract STP is Token {
         Transfer(sale, data[i], amount);    
       }
 
-        balances[sale] = SafeMath.add(balances[sale], amount * data.length);   
+      balances[sale] = SafeMath.sub(balances[sale], amount * data.length);   
     }
 
     /// @dev when token distrubution is complete freeze any remaining tokens for life of contract
