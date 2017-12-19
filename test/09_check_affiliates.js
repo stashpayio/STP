@@ -1,0 +1,206 @@
+const STP = artifacts.require("STPMock");
+
+contract('Check Multi-distribute affiliate tokens', function (accounts) {
+
+  var contractOwner = accounts[0];    
+  var sale = accounts[1];
+  var adviserAndBounty = accounts[2]
+  var adviser_1 = accounts[3];
+  var adviser_2 = accounts[4];
+  var adviser_3 = accounts[5];
+
+  var TOKEN_DECIMALS = 10**8;
+
+  // =========================================================================
+  it("01. Should multi-distribute affiliate tokens", async () => {
+    var stp = await STP.deployed();   
+
+    // remap addresses
+    await stp.mockSaleAddress(sale);
+    await stp.mockBountyAddress(adviserAndBounty);
+    
+    var affiliates = [      
+      "0x48c2739500039b4e97885F2657eA6423E369f9e486815a436A4",
+      "0x48c273950008B7A55919CDeD0c2110AA9A0Dbf7bBc435271022",
+      "0x1b48eb57e000EC0951378D0c0d66AC60d596e81a140BA0D64b30",
+      "0x500918bd8000108eD270F1338C8025f434B5d6369f45CFB4725",
+      "0xe8d4a51000e821D126da2befd9e93fc529F3C0e1f889cA0106",
+      "0x32ee841b800306e7A4b38251107C53E9F43a0233AC09B101836",
+      "0xe8d4a51000Dc0BB13587fB503EaedF57B34A603012c916Cd1d",
+      "0x2d66e7de0042f579Ad8d91Bb8B54FB75D217db0e47552546df",
+      "0x28bed016000079de00214D17802a754F157b11EfC65e13514F3",
+      "0xe8d4a51000745ceCfE7Ba6461A6E18ddEfc6a2E7eD4BbE5E2F",
+      "0x54b13085800e41fe1413744c90f6ed480871882d194c94a21a4"
+    ];
+
+     // transfer to adviser address
+     await stp.multiDistributeAdviserBounty(affiliates, false);     
+
+     var advisers = [
+      "0x2d79883d200039B6051eE8DBA5d4CBB396BafE2F38D9294c11B1",
+      "0xe35fa931a000f8536ca7a25cbf70df754fa310079ada4c6114c2",
+      "0x9184e72a00094149561ADd11d9606d488B1aD77f2F38D5Ed66c"
+     ];
+
+     // transfer to adviser address
+     await stp.multiDistributeAdviserBounty(advisers, true);    
+
+
+     var participants = [
+      "0x1247ba4108D45AB4D20B585B57db9EdDd7B0C2Dc6fee1Bec3",
+      "0x20d0bcc1efBDC29eaA8af002e44CD7333e4B09b9120682662",
+      "0x1ba653f4B0b6BB2C90C1734106435d9bc1f59Ba539603aA5",
+      "0xac2f97005Fbcb4452942Bd88E577942c71612dCEE7FCF81c",
+      "0xd6faa330020AbD3ae104b6B7549fE9DaDf3B770Bcc957B05d",
+      "0x1b700cbd020AbD3ae104b6B7549fE9DaDf3B770Bcc957B05d",
+      "0x1bc8fada020AbD3ae104b6B7549fE9DaDf3B770Bcc957B05d",
+      "0x1964595b020AbD3ae104b6B7549fE9DaDf3B770Bcc957B05d",
+      "0x7724591020AbD3ae104b6B7549fE9DaDf3B770Bcc957B05d",
+      "0x21f5d13020AbD3ae104b6B7549fE9DaDf3B770Bcc957B05d",
+      "0x2c5efc649e83058Bf49a0874198ed1A6d62aaC87828df57E",
+      "0xa85ef44f0F60a09366360418a202c1c10667577b8d054fe",
+      "0x1003d8f00f36C108349f93130aa3Ae98622f61DFA64892D9F",
+      "0x669476b6E389d4914eeaE562Cd4358433a96195Da1c3ce88",
+      "0x3f30e5668333c00fcF662c0A251aBbdC59625D67DC39e497e",
+      "0x13ab4a470ba26b7C63D34Aa70235b2B295aE1ceD33AE92aFE",
+      "0x1acd0ecc63f93a24E4434C2Fe968b02cDE244923D11BB73f9",
+      "0x137274603f93a24E4434C2Fe968b02cDE244923D11BB73f9",
+      "0x58ae06c0fc27c1cc8A258e625A047908bCD22D3d6F633F7b",
+      "0x2dc914e01b8C0bd6F405bA3300BEBe4D53C7BcEFf45a1529",
+      "0x1aaceb20E87C003BfBf354B990aaEAd50bd6c1017Da0D1aA",
+      "0x150e2ad00499aDDdd69d8c4d7233825A225E2d9a41d95a2ce",
+      "0x3bae762244B037A2e82204a4298Fe5F413367cCA963e88C9",
+      "0x629d5ef10aa1567c27edEc8E95c5084966Ac03ff5b0E0A2D7",
+      "0x8ea0f274cFb97AA6a74BbfD277377Fe560698CBB1b9a4BeF",
+      "0x1de896eaBEB5638FC2da97DEe41BE6528f7c6aF9ebA613d3",
+      "0xe17aa715a8ba713420a76668B21aE5e246dbA886038001a8B",
+      "0x45d83fc008ba713420a76668B21aE5e246dbA886038001a8B",
+      "0x23e432d228ba713420a76668B21aE5e246dbA886038001a8B",
+      "0xac5ba2648ba713420a76668B21aE5e246dbA886038001a8B",
+      "0xac2f97008ba713420a76668B21aE5e246dbA886038001a8B",
+      "0xe17aa715a8ba713420a76668B21aE5e246dbA886038001a8B",
+      "0x2dbe79408ba713420a76668B21aE5e246dbA886038001a8B",
+      "0x1a3903c346D0034220eC41A37aB7e8A8862b23BECcF9ab274",
+      "0xbf6913ed84b04e3E1b5EaE8689405665E2Bb141B12ffc7f87",
+      "0x22e25f8984b04e3E1b5EaE8689405665E2Bb141B12ffc7f87",
+      "0x2314a226a4b04e3E1b5EaE8689405665E2Bb141B12ffc7f87",
+      "0x36c2f1a2403a6a67e95d333e4ee8497408eed89f2b781ed60",
+      "0x1dd71000d44dcbE234512b67eEE60a906e39Fb73BCB18bae",
+      "0x373bfd86469c831D7dEb1d16A7AD8df8c4b207dAE70E2CFaC",
+      "0x373bfd86469c831D7dEb1d16A7AD8df8c4b207dAE70E2CFaC",
+      "0x30751c0203B9BcAd7608FbEf1D174e0bf5eB65eadA83adB00",
+      "0x19b99df803B9BcAd7608FbEf1D174e0bf5eB65eadA83adB00",
+      "0x10de58d383B9BcAd7608FbEf1D174e0bf5eB65eadA83adB00",
+      "0x841f4ca60c70dF51e6FAD2DD4d15c6664A2A40B84e20A2fF2",
+      "0x8f6d87884b706f7445F6cb492822430F1e3532D2B66C65d",
+      "0x234e72c6084b706f7445F6cb492822430F1e3532D2B66C65d",
+      "0x53b90284b706f7445F6cb492822430F1e3532D2B66C65d",
+      "0x56dbded0857D27B63Cb4fDE55AB840eaCcDd8513AE1e324B",
+      "0x35b42b4003234bC310514f24C2fb0e61Abebc0DAd9BE4F189",
+      "0x67badee03234bC310514f24C2fb0e61Abebc0DAd9BE4F189",
+      "0x4a1608b000231558e1bb507659EB6149E71501c2341F24F2",
+      "0xa3939c40f8eeE769E9B2BAaceC8897A48A6951973BefA1A1",
+      "0x53d3d1610b17A4252e3a34225a823392934274E45A1d73a5d",
+      "0x635d31e0ff4dDbCC0d719659D7889978137c2E5BA4A0C7A3",
+      "0x37c75d94042BeA9748999Cb5Aaf7fdB45B14EEC9Ec3ff86bf",
+      "0x1dd69972Df44A4d753450Fc76C87Ead2D49e43ec042800D7",
+      "0x7724591020AbD3ae104b6B7549fE9DaDf3B770Bcc957B05d",
+      "0x2c5efc649e83058Bf49a0874198ed1A6d62aaC87828df57E",
+      "0x137274603f93a24E4434C2Fe968b02cDE244923D11BB73f9",
+      "0x1dd71000d44dcbE234512b67eEE60a906e39Fb73BCB18bae",
+      "0x10de58d383B9BcAd7608FbEf1D174e0bf5eB65eadA83adB00",
+      "0x1bc8fada020AbD3ae104b6B7549fE9DaDf3B770Bcc957B05d",
+      "0x373bfd86469c831D7dEb1d16A7AD8df8c4b207dAE70E2CFaC"
+    ];
+    
+    await stp.multiDistribute(participants);
+     
+     assert.equal(await stp.balanceOf("0x39b4e97885F2657eA6423E369f9e486815a436A4"), 5000000000000, "Affiliate 50000");
+     assert.equal(await stp.balanceOf("0x8B7A55919CDeD0c2110AA9A0Dbf7bBc435271022"), 5000000000000, "Affiliate 50000");
+     assert.equal(await stp.balanceOf("0xEC0951378D0c0d66AC60d596e81a140BA0D64b30"), 30000000000000, "Affiliate 300000");
+     assert.equal(await stp.balanceOf("0x0108eD270F1338C8025f434B5d6369f45CFB4725"), 5500000000000, "Affiliate 55000");
+     assert.equal(await stp.balanceOf("0xe821D126da2befd9e93fc529F3C0e1f889cA0106"), 1000000000000, "Affiliate 10000");
+     assert.equal(await stp.balanceOf("0x306e7A4b38251107C53E9F43a0233AC09B101836"), 3500000000000, "Affiliate 35000");
+     assert.equal(await stp.balanceOf("0xDc0BB13587fB503EaedF57B34A603012c916Cd1d"), 1000000000000, "Affiliate 10000");    
+     assert.equal(await stp.balanceOf("0x42f579Ad8d91Bb8B54FB75D217db0e47552546df"), 195000000000, "Affiliate 1950");
+     assert.equal(await stp.balanceOf("0x079de00214D17802a754F157b11EfC65e13514F3"), 2800000000000, "Affiliate 28000");
+     assert.equal(await stp.balanceOf("0x745ceCfE7Ba6461A6E18ddEfc6a2E7eD4BbE5E2F"), 1000000000000, "Affiliate 10000");    
+     assert.equal(await stp.balanceOf("0xf8536ca7a25cbf70df754fa310079ada4c6114c2"), 250000000000000, "Adviser 2500000");
+     
+     assert.equal(await stp.balanceOf("0x39B6051eE8DBA5d4CBB396BafE2F38D9294c11B1"), 50000000000000, "Affiliate 500000");
+     assert.equal(await stp.balanceOf("0xe41fe1413744c90f6ed480871882d194c94a21a4"), 5820000000000, "Adviser 58200");
+     assert.equal(await stp.balanceOf("0x94149561ADd11d9606d488B1aD77f2F38D5Ed66c"), 10000000000000, "Adviser 100000");
+
+     assert.equal(await stp.isFrozen("0x39b4e97885F2657eA6423E369f9e486815a436A4"), false, "Affiliate Frozen");
+     assert.equal(await stp.isFrozen("0x39B6051eE8DBA5d4CBB396BafE2F38D9294c11B1"), true, "Adviser Frozen");
+
+    assert.equal(await stp.balanceOf("0x8D45AB4D20B585B57db9EdDd7B0C2Dc6fee1Bec3"), 4907050000, "Referral 0x8D45AB4D20B585B57db9EdDd7B0C2Dc6fee1Bec3");
+    assert.equal(await stp.balanceOf("0xfBDC29eaA8af002e44CD7333e4B09b9120682662"), 8808811550, "Referral 0xfBDC29eaA8af002e44CD7333e4B09b9120682662");
+    assert.equal(await stp.balanceOf("0xB0b6BB2C90C1734106435d9bc1f59Ba539603aA5"), 463885300, "Referral 0xB0b6BB2C90C1734106435d9bc1f59Ba539603aA5");
+    assert.equal(await stp.balanceOf("0x5Fbcb4452942Bd88E577942c71612dCEE7FCF81c"), 2888800000, "Referral 0x5Fbcb4452942Bd88E577942c71612dCEE7FCF81c");
+    assert.equal(await stp.balanceOf("0x20AbD3ae104b6B7549fE9DaDf3B770Bcc957B05d"), 91373859600., "Referral 0x20AbD3ae104b6B7549fE9DaDf3B770Bcc957B05d");
+    assert.equal(await stp.balanceOf("0x20AbD3ae104b6B7549fE9DaDf3B770Bcc957B05d"), 91373859600., "Referral 0x20AbD3ae104b6B7549fE9DaDf3B770Bcc957B05d");
+    assert.equal(await stp.balanceOf("0x20AbD3ae104b6B7549fE9DaDf3B770Bcc957B05d"), 91373859600., "Referral 0x20AbD3ae104b6B7549fE9DaDf3B770Bcc957B05d");
+    assert.equal(await stp.balanceOf("0x20AbD3ae104b6B7549fE9DaDf3B770Bcc957B05d"), 91373859600., "Referral 0x20AbD3ae104b6B7549fE9DaDf3B770Bcc957B05d");
+    assert.equal(await stp.balanceOf("0x20AbD3ae104b6B7549fE9DaDf3B770Bcc957B05d"), 91373859600., "Referral 0x20AbD3ae104b6B7549fE9DaDf3B770Bcc957B05d");
+    assert.equal(await stp.balanceOf("0x20AbD3ae104b6B7549fE9DaDf3B770Bcc957B05d"), 91373859600., "Referral 0x20AbD3ae104b6B7549fE9DaDf3B770Bcc957B05d");
+    assert.equal(await stp.balanceOf("0x9e83058Bf49a0874198ed1A6d62aaC87828df57E"), 1488845000, "Referral 0x9e83058Bf49a0874198ed1A6d62aaC87828df57E");
+    assert.equal(await stp.balanceOf("0xf0F60a09366360418a202c1c10667577b8d054fe"), 176549700, "Referral 0xf0F60a09366360418a202c1c10667577b8d054fe");
+    assert.equal(await stp.balanceOf("0xf36C108349f93130aa3Ae98622f61DFA64892D9F"), 4299001600, "Referral 0xf36C108349f93130aa3Ae98622f61DFA64892D9F");
+    assert.equal(await stp.balanceOf("0xE389d4914eeaE562Cd4358433a96195Da1c3ce88"), 1721005750., "Referral 0xE389d4914eeaE562Cd4358433a96195Da1c3ce88");
+    assert.equal(await stp.balanceOf("0x333c00fcF662c0A251aBbdC59625D67DC39e497e"), 16962705000, "Referral 0x333c00fcF662c0A251aBbdC59625D67DC39e497e");
+    assert.equal(await stp.balanceOf("0xba26b7C63D34Aa70235b2B295aE1ceD33AE92aFE"), 5279884400, "Referral 0xba26b7C63D34Aa70235b2B295aE1ceD33AE92aFE");
+    assert.equal(await stp.balanceOf("0x3f93a24E4434C2Fe968b02cDE244923D11BB73f9"), 7846876550, "Referral 0x3f93a24E4434C2Fe968b02cDE244923D11BB73f9");
+    assert.equal(await stp.balanceOf("0x3f93a24E4434C2Fe968b02cDE244923D11BB73f9"), 7846876550, "Referral 0x3f93a24E4434C2Fe968b02cDE244923D11BB73f9");
+    assert.equal(await stp.balanceOf("0xfc27c1cc8A258e625A047908bCD22D3d6F633F7b"), 1487800000, "Referral 0xfc27c1cc8A258e625A047908bCD22D3d6F633F7b");
+    assert.equal(await stp.balanceOf("0x1b8C0bd6F405bA3300BEBe4D53C7BcEFf45a1529"), 768152800, "Referral 0x1b8C0bd6F405bA3300BEBe4D53C7BcEFf45a1529");
+    assert.equal(await stp.balanceOf("0xE87C003BfBf354B990aaEAd50bd6c1017Da0D1aA"), 447540000., "Referral 0xE87C003BfBf354B990aaEAd50bd6c1017Da0D1aA");
+    assert.equal(await stp.balanceOf("0x499aDDdd69d8c4d7233825A225E2d9a41d95a2ce"), 5652000000, "Referral 0x499aDDdd69d8c4d7233825A225E2d9a41d95a2ce");
+    assert.equal(await stp.balanceOf("0x44B037A2e82204a4298Fe5F413367cCA963e88C9"), 1001289250, "Referral 0x44B037A2e82204a4298Fe5F413367cCA963e88C9");
+    assert.equal(await stp.balanceOf("0xaa1567c27edEc8E95c5084966Ac03ff5b0E0A2D7"), 26471690000, "Referral 0xaa1567c27edEc8E95c5084966Ac03ff5b0E0A2D7");
+    assert.equal(await stp.balanceOf("0xcFb97AA6a74BbfD277377Fe560698CBB1b9a4BeF"), 2392912500, "Referral 0xcFb97AA6a74BbfD277377Fe560698CBB1b9a4BeF");
+    assert.equal(await stp.balanceOf("0xBEB5638FC2da97DEe41BE6528f7c6aF9ebA613d3"), 501782250, "Referral 0xBEB5638FC2da97DEe41BE6528f7c6aF9ebA613d3");
+    assert.equal(await stp.balanceOf("0x8ba713420a76668B21aE5e246dbA886038001a8B"), 155984445050., "Referral 0x8ba713420a76668B21aE5e246dbA886038001a8B");
+    assert.equal(await stp.balanceOf("0x8ba713420a76668B21aE5e246dbA886038001a8B"), 155984445050., "Referral 0x8ba713420a76668B21aE5e246dbA886038001a8B");
+    assert.equal(await stp.balanceOf("0x8ba713420a76668B21aE5e246dbA886038001a8B"), 155984445050., "Referral 0x8ba713420a76668B21aE5e246dbA886038001a8B");
+    assert.equal(await stp.balanceOf("0x8ba713420a76668B21aE5e246dbA886038001a8B"), 155984445050., "Referral 0x8ba713420a76668B21aE5e246dbA886038001a8B");
+    assert.equal(await stp.balanceOf("0x8ba713420a76668B21aE5e246dbA886038001a8B"), 155984445050., "Referral 0x8ba713420a76668B21aE5e246dbA886038001a8B");
+    assert.equal(await stp.balanceOf("0x8ba713420a76668B21aE5e246dbA886038001a8B"), 155984445050., "Referral 0x8ba713420a76668B21aE5e246dbA886038001a8B");
+    assert.equal(await stp.balanceOf("0x8ba713420a76668B21aE5e246dbA886038001a8B"), 155984445050., "Referral 0x8ba713420a76668B21aE5e246dbA886038001a8B");
+    assert.equal(await stp.balanceOf("0x6D0034220eC41A37aB7e8A8862b23BECcF9ab274"), 7039106100., "Referral 0x6D0034220eC41A37aB7e8A8862b23BECcF9ab274");
+    //assert.equal(await stp.balanceOf("0x4b04e3E1b5EaE8689405665E2Bb141B12ffc7f87"), 70162405850, "Referral 0x4b04e3E1b5EaE8689405665E2Bb141B12ffc7f87");
+    //assert.equal(await stp.balanceOf("0x4b04e3E1b5EaE8689405665E2Bb141B12ffc7f87"), 70162405850, "Referral 0x4b04e3E1b5EaE8689405665E2Bb141B12ffc7f87");
+    //assert.equal(await stp.balanceOf("0x4b04e3E1b5EaE8689405665E2Bb141B12ffc7f87"), 70162405850, "Referral 0x4b04e3E1b5EaE8689405665E2Bb141B12ffc7f87");
+    assert.equal(await stp.balanceOf("0x03a6a67e95d333e4ee8497408eed89f2b781ed60"), 14699928100, "Referral 0x03a6a67e95d333e4ee8497408eed89f2b781ed60");
+    assert.equal(await stp.balanceOf("0xd44dcbE234512b67eEE60a906e39Fb73BCB18bae"), 1001267200, "Referral 0xd44dcbE234512b67eEE60a906e39Fb73BCB18bae");
+    assert.equal(await stp.balanceOf("0x69c831D7dEb1d16A7AD8df8c4b207dAE70E2CFaC"), 44480563500., "Referral 0x69c831D7dEb1d16A7AD8df8c4b207dAE70E2CFaC");
+    assert.equal(await stp.balanceOf("0x69c831D7dEb1d16A7AD8df8c4b207dAE70E2CFaC"), 44480563500., "Referral 0x69c831D7dEb1d16A7AD8df8c4b207dAE70E2CFaC");
+    assert.equal(await stp.balanceOf("0x3B9BcAd7608FbEf1D174e0bf5eB65eadA83adB00"), 28969450000, "Referral 0x3B9BcAd7608FbEf1D174e0bf5eB65eadA83adB00");
+    assert.equal(await stp.balanceOf("0x3B9BcAd7608FbEf1D174e0bf5eB65eadA83adB00"), 28969450000, "Referral 0x3B9BcAd7608FbEf1D174e0bf5eB65eadA83adB00");
+    assert.equal(await stp.balanceOf("0x3B9BcAd7608FbEf1D174e0bf5eB65eadA83adB00"), 28969450000, "Referral 0x3B9BcAd7608FbEf1D174e0bf5eB65eadA83adB00");
+    assert.equal(await stp.balanceOf("0xc70dF51e6FAD2DD4d15c6664A2A40B84e20A2fF2"), 35466300000, "Referral 0xc70dF51e6FAD2DD4d15c6664A2A40B84e20A2fF2");
+    assert.equal(await stp.balanceOf("0x84b706f7445F6cb492822430F1e3532D2B66C65d"), 9633381850, "Referral 0x84b706f7445F6cb492822430F1e3532D2B66C65d");
+    assert.equal(await stp.balanceOf("0x84b706f7445F6cb492822430F1e3532D2B66C65d"), 9633381850, "Referral 0x84b706f7445F6cb492822430F1e3532D2B66C65d");
+    assert.equal(await stp.balanceOf("0x84b706f7445F6cb492822430F1e3532D2B66C65d"), 9633381850, "Referral 0x84b706f7445F6cb492822430F1e3532D2B66C65d");
+    assert.equal(await stp.balanceOf("0x857D27B63Cb4fDE55AB840eaCcDd8513AE1e324B"), 1457250000, "Referral 0x857D27B63Cb4fDE55AB840eaCcDd8513AE1e324B");
+    assert.equal(await stp.balanceOf("0x3234bC310514f24C2fb0e61Abebc0DAd9BE4F189"), 16156300000., "Referral 0x3234bC310514f24C2fb0e61Abebc0DAd9BE4F189");
+    assert.equal(await stp.balanceOf("0x3234bC310514f24C2fb0e61Abebc0DAd9BE4F189"), 16156300000., "Referral 0x3234bC310514f24C2fb0e61Abebc0DAd9BE4F189");
+    assert.equal(await stp.balanceOf("0x00231558e1bb507659EB6149E71501c2341F24F2"), 1242958000, "Referral 0x00231558e1bb507659EB6149E71501c2341F24F2");
+    assert.equal(await stp.balanceOf("0xf8eeE769E9B2BAaceC8897A48A6951973BefA1A1"), 2744360000, "Referral 0xf8eeE769E9B2BAaceC8897A48A6951973BefA1A1");
+    assert.equal(await stp.balanceOf("0xb17A4252e3a34225a823392934274E45A1d73a5d"), 22502250000, "Referral 0xb17A4252e3a34225a823392934274E45A1d73a5d");
+    assert.equal(await stp.balanceOf("0xff4dDbCC0d719659D7889978137c2E5BA4A0C7A3"), 1667052000, "Referral 0xff4dDbCC0d719659D7889978137c2E5BA4A0C7A3");
+    assert.equal(await stp.balanceOf("0x42BeA9748999Cb5Aaf7fdB45B14EEC9Ec3ff86bf"), 14973000000., "Referral 0x42BeA9748999Cb5Aaf7fdB45B14EEC9Ec3ff86bf");
+    assert.equal(await stp.balanceOf("0xDf44A4d753450Fc76C87Ead2D49e43ec042800D7"), 500603250, "Referral 0xDf44A4d753450Fc76C87Ead2D49e43ec042800D7");
+    assert.equal(await stp.balanceOf("0x20AbD3ae104b6B7549fE9DaDf3B770Bcc957B05d"), 91373859600., "Referral 0x20AbD3ae104b6B7549fE9DaDf3B770Bcc957B05d");
+    assert.equal(await stp.balanceOf("0x9e83058Bf49a0874198ed1A6d62aaC87828df57E"), 1488845000, "Referral 0x9e83058Bf49a0874198ed1A6d62aaC87828df57E");
+    assert.equal(await stp.balanceOf("0x3f93a24E4434C2Fe968b02cDE244923D11BB73f9"), 7846876550, "Referral 0x3f93a24E4434C2Fe968b02cDE244923D11BB73f9");
+    assert.equal(await stp.balanceOf("0xd44dcbE234512b67eEE60a906e39Fb73BCB18bae"), 1001267200, "Referral 0xd44dcbE234512b67eEE60a906e39Fb73BCB18bae");
+    assert.equal(await stp.balanceOf("0x3B9BcAd7608FbEf1D174e0bf5eB65eadA83adB00"), 28969450000, "Referral 0x3B9BcAd7608FbEf1D174e0bf5eB65eadA83adB00");
+    assert.equal(await stp.balanceOf("0x20AbD3ae104b6B7549fE9DaDf3B770Bcc957B05d"), 91373859600., "Referral 0x20AbD3ae104b6B7549fE9DaDf3B770Bcc957B05d");
+    assert.equal(await stp.balanceOf("0x69c831D7dEb1d16A7AD8df8c4b207dAE70E2CFaC"), 44480563500., "Referral 0x69c831D7dEb1d16A7AD8df8c4b207dAE70E2CFaC");
+    
+    //assert.equal(await stp.balanceOf(adviserAndBounty), 3895005000000000, "Bounty Balance");   
+
+    
+  });
+});
